@@ -1,0 +1,212 @@
+export const socket = io();
+// selection of DOM elements - IMPORTS
+// prettier-ignore
+import { cardsContainer, startButton,restartButton, inputDiv, nameInput, nameButton, playersNames } from './utils/client-utils.js';
+// helper functions - IMPORTS
+// prettier-ignore
+import {startGame, declareWinner, addHiddenClass, toggleHideShow, preventWrongSocketInput, markActivePlayer, displayUiMessage, renderPlayerNames, restartGame, resetHelperObject, displayCurrentPlayerTurn} from './utils/client-utils.js';
+// audio files - IMPORTS
+// prettier-ignore
+import { flipSound, pairHit, errorTone, pairMissTone, } from './utils/client-utils.js';
+
+export const playersClient = [];
+export const helperObject = {
+  guesses: [],
+  id: [],
+  activePlayer: undefined,
+};
+
+addEventListener('load', function () {
+  // Disable click event on memory cards before start button is pressed
+  cardsContainer.style.pointerEvents = 'none';
+});
+
+// First listener on cardsContainer. Checks if e.target is correct and pushes two attributes to helperObject
+cardsContainer.addEventListener('click', function (e) {
+  // prevents player who is not on turn to click on cards
+  if (preventWrongSocketInput()) {
+    errorTone();
+    alert('Please Wait For Your Turn !');
+    return;
+  }
+  // guard clause for not clicking on the card inside of the cardsContainer
+  if (!e.target.classList.contains('gamefields')) return;
+  // emit card opened event to server
+  socket.emit('card opened', e.target.id);
+  // play flip sound
+  flipSound();
+  // reveal card
+  e.target.classList.toggle('hidden');
+  // store opened card data temporarily for comparison
+  helperObject.guesses.push(e.target.style.backgroundImage);
+  helperObject.id.push(e.target.id);
+});
+
+// Second listener on cardsContainer prevents double click on opened card and determines whether the guess is true or false
+cardsContainer.addEventListener('click', function () {
+  // prevents player who is not on turn to click on cards
+  if (preventWrongSocketInput()) {
+    errorTone();
+    alert('Please Wait For Your Turn !');
+    return;
+  }
+  // Returns if only one card is open
+  if (helperObject.guesses.length !== 2) return;
+  //  Below IF Block prevents clicking on already opened card
+  if (helperObject.id[0] === helperObject.id[1]) {
+    socket.emit('same card clicked', {
+      id: helperObject.id[0],
+      activePlayer: helperObject.activePlayer,
+    });
+    addHiddenClass(helperObject.id[0]);
+    resetHelperObject();
+    errorTone();
+    setTimeout(() => {
+      alert('Please Click On Two Different Fields !');
+    }, 100);
+
+    return;
+  }
+
+  // Below IF block closes cards if they are not the same
+  if (helperObject.guesses[0] !== helperObject.guesses[1]) {
+    cardsContainer.style.pointerEvents = 'none';
+    socket.emit('missed pair', {
+      missedPair: [helperObject.id[0], helperObject.id[1]],
+      activePlayer: helperObject.activePlayer,
+    });
+    setTimeout(() => {
+      toggleHideShow(helperObject.id[0]);
+      toggleHideShow(helperObject.id[1]);
+      pairMissTone();
+      resetHelperObject();
+    }, 1500);
+
+    // Else block from below handles true guess
+  } else {
+    cardsContainer.style.pointerEvents = 'none';
+
+    helperObject[`score${helperObject.activePlayer}`] += 1;
+
+    socket.emit('true pair', {
+      truePair: [helperObject.id[0], helperObject.id[1]],
+      activePlayer: helperObject.activePlayer,
+    });
+
+    setTimeout(() => {
+      // Hide first card and it's parent div wrapper
+      addHiddenClass(helperObject.id[0]);
+      document
+        .getElementById(`${helperObject.id[0]}`)
+        .closest('.gf-wrapper').style.visibility = 'hidden';
+      // Hide second card and it's parent div wrapper
+      addHiddenClass(helperObject.id[1]);
+      document
+        .getElementById(`${helperObject.id[1]}`)
+        .closest('.gf-wrapper').style.visibility = 'hidden';
+
+      pairHit();
+      // addPlus();
+      resetHelperObject();
+    }, 1500);
+  }
+});
+
+startButton.addEventListener('click', function () {
+  inputDiv.classList.remove('inactive');
+  nameInput.focus();
+  this.closest('.button-div').classList.add('inactive');
+});
+
+nameButton.addEventListener('click', function () {
+  if (nameInput.value === '') {
+    displayUiMessage('Please enter your username before starting the game');
+    nameInput.focus();
+    return;
+  }
+
+  const username = nameInput.value;
+
+  socket.emit('new player', username);
+  // clear input field and grey out input div
+  nameInput.value = '';
+  inputDiv.classList.add('inactive');
+});
+
+restartButton.addEventListener('click', restartGame);
+
+socket.on('new player connected', playersServer => {
+  renderPlayerNames(playersServer);
+  // keep the copy of the players array from server side to client side
+  playersClient.length === 0
+    ? playersClient.push(...playersServer)
+    : playersClient.push(playersServer.pop());
+});
+
+socket.on('waiting for second player', () => {
+  displayUiMessage('Waiting for second player to connect...');
+});
+
+socket.on('active player', activePlayer => {
+  helperObject.activePlayer = activePlayer;
+  markActivePlayer(helperObject.activePlayer);
+  displayCurrentPlayerTurn();
+});
+
+socket.on('active player change', newActivePlayer => {
+  playersNames.forEach(name => name.classList.remove('active-player'));
+
+  helperObject.activePlayer = newActivePlayer;
+  markActivePlayer(helperObject.activePlayer);
+  displayCurrentPlayerTurn();
+});
+
+socket.on('both players connected', data => {
+  // console.log(data.memoryCards, 'memoryCards');
+  startGame(data.memoryCards);
+  displayUiMessage('Both players connected. Starting the game...');
+});
+
+socket.on('show opened card', openedCardId => {
+  document.getElementById(`${openedCardId}`).classList.remove('hidden');
+});
+
+socket.on('same card invalid move', data => {
+  displayUiMessage('Opponent clicked on the same card twice.');
+  errorTone();
+  document.getElementById(`${data.id}`).classList.add('hidden');
+});
+
+socket.on('close true pair', data => {
+  setTimeout(() => {
+    data.truePair.forEach(cardId => {
+      document.getElementById(`${cardId}`).classList.add('hidden');
+      document
+        .getElementById(`${cardId}`)
+        .closest('.gf-wrapper').style.visibility = 'hidden';
+    });
+  }, 1500);
+});
+socket.on('close missed pair', data => {
+  setTimeout(() => {
+    data.missedPair.forEach(cardId => {
+      document.getElementById(`${cardId}`).classList.add('hidden');
+    });
+  }, 1500);
+
+  socket.on('update score', score => {
+    document.querySelector('.pairs-0').textContent = score[0];
+    document.querySelector('.pairs-1').textContent = score[1];
+  });
+
+  socket.on('restart game board', () => {
+    document.querySelectorAll('.gf-wrapper').forEach(wrapper => {
+      wrapper.style.visibility = 'visible';
+    });
+    document.querySelector('.restart-btn').classList.add('inactive');
+  });
+
+  socket.on('game over', score => {
+    declareWinner(score);
+  });
+});

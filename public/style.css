@@ -1,0 +1,139 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: url('./background/background-pattern.jpg') repeat;
+  position: relative;
+}
+
+/* ************* Utility Classes ************** */
+.inactive {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.active-player {
+  border: 2px solid orangered;
+}
+
+.hidden {
+  opacity: 0;
+}
+/* ************* Utility Classes ************** */
+
+h1 {
+  font-size: 3rem;
+  color: orangered;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+h2 {
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.cards-container {
+  max-width: 120rem;
+  margin: auto;
+  display: grid;
+  grid-gap: 1.5rem;
+  place-content: center;
+  grid-template-columns: repeat(6, auto);
+}
+
+.gf-wrapper {
+  background: url('./blank/blank.jpg') no-repeat center center/cover;
+  border-radius: 1rem;
+  transition: transform 0.4s;
+}
+
+.gamefields {
+  width: 9rem;
+  height: 9rem;
+  transition: transform 0.4s;
+  background: url('./blank/blank.jpg') no-repeat center center/cover;
+  border-radius: 1rem;
+}
+
+.gamefields:hover,
+.gf-wrapper:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 5px 2px rgba(51, 51, 51, 0.5);
+  transform: scale(1.04);
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  text-align: center;
+  max-width: 120rem;
+  margin: 2.5rem auto;
+  height: 6rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 1px 1px 5px 2px rgba(51, 51, 51, 0.5);
+}
+/*** ************************************************* ***/
+.player {
+  width: 10rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.left-player {
+  position: absolute;
+  top: 30%;
+  left: 20%;
+}
+.right-player {
+  position: absolute;
+  top: 30%;
+  right: 20%;
+}
+
+.player-h2 {
+  padding: 0.5rem 1rem;
+}
+/*** ************************************************* ***/
+
+/*** below info field *** USER INTERFACE *** below info field ***/
+
+.user-interface {
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 120rem;
+  margin: auto;
+}
+
+.name-input {
+  padding: 0.5rem 2rem;
+  font-size: 1.8rem;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.btn {
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.8rem;
+}
