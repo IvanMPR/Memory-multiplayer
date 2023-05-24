@@ -150,7 +150,7 @@ export function showRestartButton() {
 export function winner(position) {
   const winner = document.querySelector(`.player-${position}-h2`).textContent;
   displayUiMessage(`${winner} won the game!`);
-  endGameTone();
+  // endGameTone();
   showRestartButton();
   clearActivePlayer();
   cardsContainer.style.pointerEvents = 'none';
@@ -163,7 +163,7 @@ export function declareWinner(score) {
     winner(1);
   } else {
     displayUiMessage(`It's a tie!`);
-    endGameTone();
+    // endGameTone();
     showRestartButton();
   }
 }

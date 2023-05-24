@@ -1,7 +1,7 @@
 export const socket = io();
 // selection of DOM elements - IMPORTS
 // prettier-ignore
-import { cardsContainer, startButton,restartButton, inputDiv, nameInput, nameButton, playersNames } from './utils/client-utils.js';
+import { cardsContainer, startButton,restartButton, inputDiv, nameInput, nameButton, playersNames, endGameTone } from './utils/client-utils.js';
 // helper functions - IMPORTS
 // prettier-ignore
 import {startGame, declareWinner, addHiddenClass, toggleHideShow, preventWrongSocketInput, markActivePlayer, displayUiMessage, renderPlayerNames, restartGame, resetHelperObject, displayCurrentPlayerTurn} from './utils/client-utils.js';
@@ -26,7 +26,7 @@ cardsContainer.addEventListener('click', function (e) {
   // prevents player who is not on turn to click on cards
   if (preventWrongSocketInput()) {
     errorTone();
-    alert('Please Wait For Your Turn !');
+    displayUiMessage('Please Wait For Your Turn !');
     return;
   }
   // guard clause for not clicking on the card inside of the cardsContainer
@@ -47,9 +47,10 @@ cardsContainer.addEventListener('click', function () {
   // prevents player who is not on turn to click on cards
   if (preventWrongSocketInput()) {
     errorTone();
-    alert('Please Wait For Your Turn !');
+    displayUiMessage('Please Wait For Your Turn !');
     return;
   }
+
   // Returns if only one card is open
   if (helperObject.guesses.length !== 2) return;
   //  Below IF Block prevents clicking on already opened card
@@ -61,15 +62,14 @@ cardsContainer.addEventListener('click', function () {
     addHiddenClass(helperObject.id[0]);
     resetHelperObject();
     errorTone();
-    setTimeout(() => {
-      alert('Please Click On Two Different Fields !');
-    }, 100);
+    displayUiMessage("You can't click on the same card twice!");
 
     return;
   }
 
   // Below IF block closes cards if they are not the same
   if (helperObject.guesses[0] !== helperObject.guesses[1]) {
+    // flipSound();
     cardsContainer.style.pointerEvents = 'none';
     socket.emit('missed pair', {
       missedPair: [helperObject.id[0], helperObject.id[1]],
@@ -106,7 +106,6 @@ cardsContainer.addEventListener('click', function () {
         .closest('.gf-wrapper').style.visibility = 'hidden';
 
       pairHit();
-      // addPlus();
       resetHelperObject();
     }, 1500);
   }
@@ -178,6 +177,7 @@ socket.on('same card invalid move', data => {
 });
 
 socket.on('close true pair', data => {
+  pairHit();
   setTimeout(() => {
     data.truePair.forEach(cardId => {
       document.getElementById(`${cardId}`).classList.add('hidden');
@@ -192,6 +192,7 @@ socket.on('close missed pair', data => {
     data.missedPair.forEach(cardId => {
       document.getElementById(`${cardId}`).classList.add('hidden');
     });
+    pairMissTone();
   }, 1500);
 
   socket.on('update score', score => {
@@ -208,5 +209,6 @@ socket.on('close missed pair', data => {
 
   socket.on('game over', score => {
     declareWinner(score);
+    endGameTone();
   });
 });
