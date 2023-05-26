@@ -78,7 +78,6 @@ io.on('connection', socket => {
   });
 
   socket.on('missed pair', data => {
-    // io.emit('play card opened sound');
     socket.broadcast.emit('close missed pair', data);
     setTimeout(() => {
       const newActivePlayer = data.activePlayer === 0 ? 1 : 0;

@@ -178,7 +178,6 @@ socket.on('same card invalid move', data => {
 socket.on('play card opened sound', () => flipSound());
 
 socket.on('close true pair', data => {
-  pairHit();
   setTimeout(() => {
     data.truePair.forEach(cardId => {
       document.getElementById(`${cardId}`).classList.add('hidden');
@@ -186,6 +185,7 @@ socket.on('close true pair', data => {
         .getElementById(`${cardId}`)
         .closest('.gf-wrapper').style.visibility = 'hidden';
     });
+    pairHit();
   }, 1500);
 });
 socket.on('close missed pair', data => {
