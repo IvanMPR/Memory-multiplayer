@@ -64,7 +64,7 @@ p {
   transition: transform 0.4s;
 }
 
-.gamefields {
+.game-fields {
   width: 9rem;
   height: 9rem;
   transition: transform 0.4s;
@@ -72,7 +72,7 @@ p {
   border-radius: 1rem;
 }
 
-.gamefields:hover,
+.game-fields:hover,
 .gf-wrapper:hover {
   cursor: pointer;
   box-shadow: 1px 1px 5px 2px rgba(51, 51, 51, 0.5);

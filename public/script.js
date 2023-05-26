@@ -30,11 +30,9 @@ cardsContainer.addEventListener('click', function (e) {
     return;
   }
   // guard clause for not clicking on the card inside of the cardsContainer
-  if (!e.target.classList.contains('gamefields')) return;
+  if (!e.target.classList.contains('game-fields')) return;
   // emit card opened event to server
   socket.emit('card opened', e.target.id);
-  // play flip sound
-  flipSound();
   // reveal card
   e.target.classList.toggle('hidden');
   // store opened card data temporarily for comparison
@@ -168,6 +166,7 @@ socket.on('both players connected', data => {
 
 socket.on('show opened card', openedCardId => {
   document.getElementById(`${openedCardId}`).classList.remove('hidden');
+  flipSound();
 });
 
 socket.on('same card invalid move', data => {
@@ -175,6 +174,8 @@ socket.on('same card invalid move', data => {
   errorTone();
   document.getElementById(`${data.id}`).classList.add('hidden');
 });
+// sound-effects
+socket.on('play card opened sound', () => flipSound());
 
 socket.on('close true pair', data => {
   pairHit();
@@ -204,7 +205,10 @@ socket.on('close missed pair', data => {
     document.querySelectorAll('.gf-wrapper').forEach(wrapper => {
       wrapper.style.visibility = 'visible';
     });
-    document.querySelector('.restart-btn').classList.add('inactive');
+    document
+      .querySelector('.restart-btn')
+      .closest('.restart-button-div')
+      .classList.add('inactive');
   });
 
   socket.on('game over', score => {

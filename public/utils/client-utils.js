@@ -38,7 +38,7 @@ export const cards = [
   'time',
 ];
 
-export const cardFields = document.querySelectorAll('.gamefields');
+export const cardFields = document.querySelectorAll('.game-fields');
 export const cardsContainer = document.querySelector('.cards-container');
 export const startButton = document.querySelector('.start-btn');
 export const restartButton = document.querySelector('.restart-btn');
@@ -138,7 +138,6 @@ export function flashWrongMoveWarning(oldMessage) {
 
 export function flipActivePlayer() {
   helperObject.activePlayer === 0 ? 1 : 0;
-  // const newActivePlayer = currentActivePlayer === 0 ? 1 : 0;
   markActivePlayer(helperObject.activePlayer);
   displayCurrentPlayerTurn();
 }
@@ -150,7 +149,6 @@ export function showRestartButton() {
 export function winner(position) {
   const winner = document.querySelector(`.player-${position}-h2`).textContent;
   displayUiMessage(`${winner} won the game!`);
-  // endGameTone();
   showRestartButton();
   clearActivePlayer();
   cardsContainer.style.pointerEvents = 'none';
@@ -163,13 +161,11 @@ export function declareWinner(score) {
     winner(1);
   } else {
     displayUiMessage(`It's a tie!`);
-    // endGameTone();
     showRestartButton();
   }
 }
 
 export function restartGame() {
-  this.closest('.restart-button-div').classList.add('inactive');
   resetHelperObject();
   socket.emit('restart game');
 }
