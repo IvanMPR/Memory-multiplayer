@@ -188,6 +188,7 @@ socket.on('close true pair', data => {
     pairHit();
   }, 1500);
 });
+
 socket.on('close missed pair', data => {
   setTimeout(() => {
     data.missedPair.forEach(cardId => {
