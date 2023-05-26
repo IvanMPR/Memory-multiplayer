@@ -132,6 +132,8 @@ nameButton.addEventListener('click', function () {
 
 restartButton.addEventListener('click', restartGame);
 
+// ------------------------------ SOCKETS HANDLERS ------------------------------ //
+
 socket.on('new player connected', playersServer => {
   renderPlayerNames(playersServer);
   // keep the copy of the players array from server side to client side
@@ -159,7 +161,6 @@ socket.on('active player change', newActivePlayer => {
 });
 
 socket.on('both players connected', data => {
-  // console.log(data.memoryCards, 'memoryCards');
   startGame(data.memoryCards);
   displayUiMessage('Both players connected. Starting the game...');
 });

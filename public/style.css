@@ -16,6 +16,13 @@ body {
   position: relative;
 }
 
+.wrapper {
+  max-width: 120rem;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
 /* ************* Utility Classes ************** */
 .inactive {
   pointer-events: none;
@@ -97,17 +104,6 @@ p {
   width: 10rem;
   text-align: center;
   padding: 1rem;
-}
-
-.left-player {
-  position: absolute;
-  top: 30%;
-  left: 20%;
-}
-.right-player {
-  position: absolute;
-  top: 30%;
-  right: 20%;
 }
 
 .player-h2 {
