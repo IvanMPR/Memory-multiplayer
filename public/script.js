@@ -1,10 +1,12 @@
 export const socket = io();
+// constants - IMPORTS
+import { DELAY_TIME } from './utils/client-utils.js';
 // selection of DOM elements - IMPORTS
 // prettier-ignore
 import { cardsContainer, startButton,restartButton, inputDiv, nameInput, nameButton, playersNames, endGameTone } from './utils/client-utils.js';
 // helper functions - IMPORTS
 // prettier-ignore
-import {startGame, declareWinner, addHiddenClass, toggleHideShow, preventWrongSocketInput, markActivePlayer, displayUiMessage, renderPlayerNames, restartGame, resetHelperObject, displayCurrentPlayerTurn} from './utils/client-utils.js';
+import {startGame, declareWinner, addHiddenClass,toggleHideShow, preventWrongSocketInput, markActivePlayer, displayUiMessage, renderPlayerNames, restartGame, resetHelperObject, displayCurrentPlayerTurn, disableMouseClick} from './utils/client-utils.js';
 // audio files - IMPORTS
 // prettier-ignore
 import { flipSound, pairHit, errorTone, pairMissTone, } from './utils/client-utils.js';
@@ -18,7 +20,7 @@ export const helperObject = {
 
 addEventListener('load', function () {
   // Disable click event on memory cards before start button is pressed
-  cardsContainer.style.pointerEvents = 'none';
+  disableMouseClick();
 });
 
 // First listener on cardsContainer. Checks if e.target is correct and pushes two attributes to helperObject
@@ -33,7 +35,7 @@ cardsContainer.addEventListener('click', function (e) {
   if (!e.target.classList.contains('game-fields')) return;
   // emit card opened event to server
   socket.emit('card opened', e.target.id);
-  // reveal card
+  // reveal card in active client
   e.target.classList.toggle('hidden');
   // store opened card data temporarily for comparison
   helperObject.guesses.push(e.target.style.backgroundImage);
@@ -53,6 +55,7 @@ cardsContainer.addEventListener('click', function () {
   if (helperObject.guesses.length !== 2) return;
   //  Below IF Block prevents clicking on already opened card
   if (helperObject.id[0] === helperObject.id[1]) {
+    disableMouseClick();
     socket.emit('same card clicked', {
       id: helperObject.id[0],
       activePlayer: helperObject.activePlayer,
@@ -67,30 +70,37 @@ cardsContainer.addEventListener('click', function () {
 
   // Below IF block closes cards if they are not the same
   if (helperObject.guesses[0] !== helperObject.guesses[1]) {
-    // flipSound();
-    cardsContainer.style.pointerEvents = 'none';
+    // disable click event on memory cards in between the moves
+    disableMouseClick();
+    // emit missed pair event to server
     socket.emit('missed pair', {
       missedPair: [helperObject.id[0], helperObject.id[1]],
       activePlayer: helperObject.activePlayer,
     });
+    // in active client...
     setTimeout(() => {
+      // Hide first card
       toggleHideShow(helperObject.id[0]);
+      // Hide second card
       toggleHideShow(helperObject.id[1]);
+      // play missed pair tone
       pairMissTone();
+      // reset helper object
       resetHelperObject();
-    }, 1500);
+    }, DELAY_TIME);
 
     // Else block from below handles true guess
   } else {
-    cardsContainer.style.pointerEvents = 'none';
-
+    // Disable click event on memory cards in between the moves
+    disableMouseClick();
+    // update score
     helperObject[`score${helperObject.activePlayer}`] += 1;
-
+    // emit true pair event to server
     socket.emit('true pair', {
       truePair: [helperObject.id[0], helperObject.id[1]],
       activePlayer: helperObject.activePlayer,
     });
-
+    // in active client...
     setTimeout(() => {
       // Hide first card and it's parent div wrapper
       addHiddenClass(helperObject.id[0]);
@@ -102,10 +112,11 @@ cardsContainer.addEventListener('click', function () {
       document
         .getElementById(`${helperObject.id[1]}`)
         .closest('.gf-wrapper').style.visibility = 'hidden';
-
+      // play pair hit tone
       pairHit();
+      // reset helper object
       resetHelperObject();
-    }, 1500);
+    }, DELAY_TIME);
   }
 });
 
@@ -187,7 +198,7 @@ socket.on('close true pair', data => {
         .closest('.gf-wrapper').style.visibility = 'hidden';
     });
     pairHit();
-  }, 1500);
+  }, DELAY_TIME);
 });
 
 socket.on('close missed pair', data => {
@@ -196,7 +207,7 @@ socket.on('close missed pair', data => {
       document.getElementById(`${cardId}`).classList.add('hidden');
     });
     pairMissTone();
-  }, 1500);
+  }, DELAY_TIME);
 
   socket.on('update score', score => {
     document.querySelector('.pairs-0').textContent = score[0];

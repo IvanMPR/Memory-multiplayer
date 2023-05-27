@@ -38,6 +38,7 @@ const cards = [
 ];
 const score = [0, 0];
 const playersServer = [];
+const DELAY_TIME = 1500;
 // Knuth-Yates shuffle function. ! Borrowed code ! Shuffles cards on start of the level
 function shuffle(array) {
   var currentIndex = array.length,
@@ -80,4 +81,5 @@ module.exports = {
   isGameOver,
   playersServer,
   score,
+  DELAY_TIME,
 };

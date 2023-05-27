@@ -37,7 +37,7 @@ export const cards = [
   'time',
   'time',
 ];
-
+export const DELAY_TIME = 1500;
 export const cardFields = document.querySelectorAll('.game-fields');
 export const cardsContainer = document.querySelector('.cards-container');
 export const startButton = document.querySelector('.start-btn');
@@ -51,27 +51,6 @@ export const playersNames = document.querySelectorAll('.player-h2');
 // ----------------------HELPER FUNCTIONS----------------------//
 //-------------------------------------------------------------//
 
-// Knuth-Yates shuffle function. ! Borrowed code ! Shuffles cards on start of the level
-export function shuffle(array) {
-  var currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
-
-  //While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-    //Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    //And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-}
-
 export function resetHelperObject() {
   helperObject.guesses = [];
   helperObject.id = [];
@@ -80,10 +59,6 @@ export function resetHelperObject() {
 
 export function toggleHideShow(el, classList = 'hidden') {
   return document.getElementById(`${el}`).classList.toggle(`${classList}`);
-}
-
-export function addHiddenClass(el, classList = 'hidden') {
-  return document.getElementById(`${el}`).classList.add(`${classList}`);
 }
 
 export function displayUiMessage(message) {
@@ -106,12 +81,6 @@ export function markActivePlayer(activePlayer) {
     .classList.add('active-player');
 }
 
-export function clearActivePlayer() {
-  playersNames.forEach(name => {
-    name.classList.remove('active-player');
-  });
-}
-
 export function displayCurrentPlayerTurn() {
   const activePlayerName = document.querySelector(
     `.player-${helperObject.activePlayer}-h2`
@@ -125,33 +94,6 @@ export function preventWrongSocketInput() {
   const activePlayerName = document.querySelector('.active-player').textContent;
 
   return name !== activePlayerName;
-}
-
-export function flashWrongMoveWarning(oldMessage) {
-  const activePlayerName = document.querySelector('.active-player').textContent;
-  displayUiMessage(`It's not your turn, ${activePlayerName} is on the move!`);
-  errorTone();
-  setTimeout(() => {
-    displayUiMessage(oldMessage);
-  }, 1500);
-}
-
-export function flipActivePlayer() {
-  helperObject.activePlayer === 0 ? 1 : 0;
-  markActivePlayer(helperObject.activePlayer);
-  displayCurrentPlayerTurn();
-}
-
-export function showRestartButton() {
-  restartButton.closest('.restart-button-div').classList.remove('inactive');
-}
-
-export function winner(position) {
-  const winner = document.querySelector(`.player-${position}-h2`).textContent;
-  displayUiMessage(`${winner} won the game!`);
-  showRestartButton();
-  clearActivePlayer();
-  cardsContainer.style.pointerEvents = 'none';
 }
 
 export function declareWinner(score) {
@@ -180,6 +122,30 @@ export function startGame(shuffledCardsArray) {
     .querySelectorAll('.gf-wrapper')
     .forEach(wrapper => wrapper.classList.remove('hidden'));
   cardsContainer.style.pointerEvents = 'initial';
+}
+export function addHiddenClass(id) {
+  document.getElementById(`${id}`).classList.add('hidden');
+}
+
+export function disableMouseClick() {
+  cardsContainer.style.pointerEvents = 'none';
+}
+
+function clearActivePlayer() {
+  playersNames.forEach(name => {
+    name.classList.remove('active-player');
+  });
+}
+function showRestartButton() {
+  restartButton.closest('.restart-button-div').classList.remove('inactive');
+}
+
+function winner(position) {
+  const winner = document.querySelector(`.player-${position}-h2`).textContent;
+  displayUiMessage(`${winner} won the game!`);
+  showRestartButton();
+  clearActivePlayer();
+  cardsContainer.style.pointerEvents = 'none';
 }
 
 // ---------------------------------------------- Audio files ----------------------------------------------//

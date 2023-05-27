@@ -15,6 +15,7 @@ const {
   isGameOver,
   playersServer,
   score,
+  DELAY_TIME,
 } = require('./public/utils/utils');
 
 // Set static folder
@@ -31,8 +32,6 @@ io.on('connection', socket => {
 
     // if two playersServer are already connected, reject attempted connection
     if (playersServer.length === 2) {
-      socket.emit('no room');
-      console.log('disconnected');
       socket.disconnect();
       return;
     }
@@ -49,7 +48,7 @@ io.on('connection', socket => {
       setTimeout(() => {
         let activePlayer = Math.floor(Math.random() * 2);
         io.emit('active player', activePlayer);
-      }, 1500);
+      }, DELAY_TIME);
     }
 
     io.emit('new player connected', playersServer);
@@ -65,7 +64,7 @@ io.on('connection', socket => {
     setTimeout(() => {
       const newActivePlayer = data.activePlayer === 0 ? 1 : 0;
       io.emit('active player change', newActivePlayer);
-    }, 1500);
+    }, DELAY_TIME);
   });
 
   socket.on('true pair', data => {
@@ -82,7 +81,7 @@ io.on('connection', socket => {
     setTimeout(() => {
       const newActivePlayer = data.activePlayer === 0 ? 1 : 0;
       io.emit('active player change', newActivePlayer);
-    }, 1500);
+    }, DELAY_TIME);
   });
 
   socket.on('restart game', () => {
@@ -94,35 +93,10 @@ io.on('connection', socket => {
       let activePlayer = Math.floor(Math.random() * 2);
       io.emit('active player', activePlayer);
       io.emit('update score', score);
-    }, 1500);
+    }, DELAY_TIME);
     io.emit('new player connected', playersServer);
-  });
-
-  // ------------------- IF PLAYER LEAVES DURING THE GAME --------------------- //
-  socket.on('disconnect', () => {
-    // disconnected player id
-    const id = socket.id;
-    // declare variables that will be sent by the 'player left event'
-    let position;
-    let playerName;
-
-    if (!playersServer.some(player => player.id === id)) {
-      return;
-    }
-    // delete disconnected player from players array
-    if (playersServer.length > 0) {
-      // determine if first or second player has left the game
-      position = playersServer[0].id === id ? 0 : 1;
-      // get username of the player who left
-      playerName = playersServer[position].username;
-      // remove first or last player from the array, depending who has left
-      position === 0 ? playersServer.shift() : playersServer.pop();
-    }
-
-    // emit left event, and send data about player who has left, that will be used to inform remaining player
-    io.emit('player left game', { playerName, position });
   });
 });
 // --------------- PORT ---------------- //
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT);
